@@ -14,6 +14,7 @@
 	import away3d.primitives.data.CubeMaterialsData;
 	import away3d.materials.BitmapFileMaterial;
 	import pl.pawelnielepkowicz.*
+	import pl.pawelnielepkowicz.factory.*;
 	import away3d.primitives.GridPlane;
 	
 	public class Main extends Sprite
@@ -26,7 +27,6 @@
 		var currentPrimitive;
 		var roundedCube;
 		var cubeMaterialsData:CubeMaterialsData;
-		var myHeroProvider:MyHeroProvider = new MyHeroProvider;
 		var myHero:RoundedCube
 		
 		// poruszanie sie myHero
@@ -34,11 +34,10 @@
         private var moveRight:Boolean;
         private var limitRight:int = 600;
 		private var limitLeft:int = -600;
+		private var step:uint = 45;
 
+		var object3DFactory: Object3DFactory = new Object3DFactory;
 
-        private var step:uint = 15;
-		
-		
 		public function Main():void
 		{
 			initEngine();
@@ -99,8 +98,6 @@
 				trace("hit!" + cubesArray[i]);
 				}
 			}
-			
-
 		}
 		
 		private function AABBTest(testObject: RoundedCube):Boolean{
@@ -138,18 +135,23 @@
 		}
 		
 		protected function initHero():void {
-				myHero = myHeroProvider.provide();
+			myHero = object3DFactory.get3DObjectType("Hero").provide();
+			
+				//myHero = myHeroProvider.provide();
 				
 				myHero.x = -350;
 				myHero.z =  -900;
 				scene.addChild(myHero);
+				
 		}
 		
+
+
 		protected function initCustomCubes():void {
 			
 			for(var i:int = 0; i<10; i++){
-				var myCube:MyCubeProvider = new MyCubeProvider;
-				var roundedCube:RoundedCube = myCube.provide();
+				var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
+				
 				cubesArray.push(roundedCube);
 				roundedCube.x = 120* i - 500;
 				roundedCube.z =  1000;
