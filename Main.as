@@ -15,7 +15,9 @@
 	import away3d.materials.BitmapFileMaterial;
 	import pl.pawelnielepkowicz.*
 	import pl.pawelnielepkowicz.factory.*;
+	import pl.pawelnielepkowicz.utils.*;
 	import away3d.primitives.GridPlane;
+	import away3d.cameras.lenses.*
 	
 	public class Main extends Sprite
 	{
@@ -32,17 +34,20 @@
 		// poruszanie sie myHero
         private var moveLeft:Boolean;
         private var moveRight:Boolean;
-        private var limitRight:int = 600;
-		private var limitLeft:int = -600;
+        private var limitRight:int = 500;
+		private var limitLeft:int = -500;
 		private var step:uint = 45;
 
 		var object3DFactory: Object3DFactory = new Object3DFactory;
+		var gameUtils: GameUtils = new GameUtils;
 
 		public function Main():void
 		{
 			initEngine();
-			initScene();
 			initListeners();
+			initMesh();
+			initCamera();
+			initHero();
 		}
 		
 		protected function initEngine():void
@@ -54,6 +59,14 @@
 			view.x = stage.stageWidth / 2;
 			view.y = stage.stageHeight / 2;
 			var myInterval:uint = setInterval (intervalAction, 500);
+			
+			var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
+				cubesArray.push(roundedCube);
+				//var randomNumber:Number = Math.floor(Math.random()*100);
+
+				roundedCube.x = 100;
+				roundedCube.z =  1000;
+				scene.addChild(roundedCube);
 		}
 		
 		protected function initListeners():void
@@ -85,22 +98,26 @@
 		protected function onEnterFrame(event:Event):void
 		{
 			view.render();
-			cubesArray[0].yaw(1.5);
 			myHero.yaw(1.5);
 			
 			if (moveLeft && myHero.x > limitLeft )  {myHero.x -= step;} 
 		
             if (moveRight && myHero.x < limitRight ) {myHero.x += step;}
 			
-			for(var i:int = 0; i<10; i++){
+			for(var i:int = 0; i<cubesArray.length; i++){
 				if(AABBTest(cubesArray[i])){
 					scene.removeChild(cubesArray[i]);
+					cubesArray[i]=null;
+					cubesArray.splice(i,1);
 				trace("hit!" + cubesArray[i]);
 				}
 			}
 		}
 		
 		private function AABBTest(testObject: RoundedCube):Boolean{
+			
+			
+			
 			if(testObject.parentMinX>myHero.parentMaxX||myHero.parentMinX>testObject.
 			parentMaxX){
 			return false;
@@ -113,47 +130,48 @@
 			parentMaxZ){
 			return false;
 			}
+			
 			return true;
 		}
 		
 		function intervalAction():void {
-			for(var i:int = 0; i<10; i++){
-				if(cubesArray[i].z > myHero.z){
-				cubesArray[i].z =  cubesArray[i].z - 200;
-				}else{
-					cubesArray[i].z=1000;
+			
+			var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
+				cubesArray.push(roundedCube);
+				roundedCube.x = gameUtils.getRandomPosition(this.limitRight, true);
+				roundedCube.z =  1000;
+				scene.addChild(roundedCube);
+			
+			if(cubesArray.length>0){
+				for(var i:int = 0; i<cubesArray.length; i++){
+					if(cubesArray[i].z > myHero.z){
+									trace("if");
+
+					cubesArray[i].z =  cubesArray[i].z - 200;
+					}else{
+						// kasacja obiektu
+									trace("else");
+
+						cubesArray[i].z=1000;
+					}
 				}
 			}
-		}
-
-		protected function initScene():void {
-			initCustomCubes();
-			initMesh();
-			initCamera();
-			initHero();
-
 		}
 		
 		protected function initHero():void {
 			myHero = object3DFactory.get3DObjectType("Hero").provide();
-			
-				//myHero = myHeroProvider.provide();
-				
-				myHero.x = -350;
-				myHero.z =  -900;
-				scene.addChild(myHero);
-				
+			myHero.x = -350;
+			myHero.z =  -1300;
+			scene.addChild(myHero);
 		}
 		
 
 
 		protected function initCustomCubes():void {
-			
 			for(var i:int = 0; i<10; i++){
 				var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
-				
 				cubesArray.push(roundedCube);
-				roundedCube.x = 120* i - 500;
+				roundedCube.x = 100* i - 500;
 				roundedCube.z =  1000;
 				scene.addChild(cubesArray[i]);
 			}
@@ -167,14 +185,14 @@
 													});
 			gridPlane.y = -50;
 			scene.addChild(gridPlane);
-
 		}
 
 		protected function initCamera():void {
 			camera.x= 0;
 			camera.y= 200;
 			camera.z= -1700;
-			/*camera.focus=0.8;*/
+			
+			view.camera.focus=55;		
 			camera.rotationX= -20;
 			trace(camera.fov);
 		}
