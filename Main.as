@@ -5,6 +5,7 @@
 	import away3d.containers.View3D;
 	
 	import flash.display.Sprite;
+	import flash.display.*;
 	import flash.events.Event;
 	import flash.utils.*;
 	import flash.events.KeyboardEvent;
@@ -40,6 +41,11 @@
 
 		var object3DFactory: Object3DFactory = new Object3DFactory;
 		var gameUtils: GameUtils = new GameUtils;
+				
+		
+		/*var topBar = new MovieClip;
+		var lifeBar:MovieClip;
+		var scoreTextField:MovieClip;*/
 
 		public function Main():void
 		{
@@ -48,9 +54,18 @@
 			initMesh();
 			initCamera();
 			initHero();
+			//initMovieClips();
 		}
 		
-		protected function initEngine():void
+		public function initMovieClips():void
+		{
+			var topBar:MovieClip = new TopBar();
+			trace(topBar.width);
+			stage.addChild(topBar);
+
+		}
+		
+		public function initEngine():void
 		{
 			view = new View3D();
 			scene = view.scene;
@@ -59,17 +74,9 @@
 			view.x = stage.stageWidth / 2;
 			view.y = stage.stageHeight / 2;
 			var myInterval:uint = setInterval (intervalAction, 500);
-			
-			var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
-				cubesArray.push(roundedCube);
-				//var randomNumber:Number = Math.floor(Math.random()*100);
-
-				roundedCube.x = 100;
-				roundedCube.z =  1000;
-				scene.addChild(roundedCube);
 		}
 		
-		protected function initListeners():void
+		public function initListeners():void
 		{
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyPress);
@@ -116,8 +123,6 @@
 		
 		private function AABBTest(testObject: RoundedCube):Boolean{
 			
-			
-			
 			if(testObject.parentMinX>myHero.parentMaxX||myHero.parentMinX>testObject.
 			parentMaxX){
 			return false;
@@ -130,7 +135,6 @@
 			parentMaxZ){
 			return false;
 			}
-			
 			return true;
 		}
 		
@@ -145,13 +149,12 @@
 			if(cubesArray.length>0){
 				for(var i:int = 0; i<cubesArray.length; i++){
 					if(cubesArray[i].z > myHero.z){
-									trace("if");
+									trace("zdobyles punkt!!");
 
 					cubesArray[i].z =  cubesArray[i].z - 200;
 					}else{
 						// kasacja obiektu
-									trace("else");
-
+						trace("TODO: kasacja");
 						cubesArray[i].z=1000;
 					}
 				}
