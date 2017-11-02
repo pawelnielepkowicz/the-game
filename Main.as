@@ -41,12 +41,11 @@
 
 		var object3DFactory: Object3DFactory = new Object3DFactory;
 		var gameUtils: GameUtils = new GameUtils;
-				
 		
-		/*var topBar = new MovieClip;
-		var lifeBar:MovieClip;
-		var scoreTextField:MovieClip;*/
-
+		var scores:int = 0;
+		var lifeBarWidth:int = 300;
+		var yourMood:String = "sad"
+;
 		public function Main():void
 		{
 			initEngine();
@@ -54,16 +53,19 @@
 			initMesh();
 			initCamera();
 			initHero();
-			//initMovieClips();
+			
+			testHolder();
 		}
 		
-		public function initMovieClips():void
-		{
-			var topBar:MovieClip = new TopBar();
-			trace(topBar.width);
-			stage.addChild(topBar);
-
+		public function testHolder():void{
+			
+			var cubeHolder:CubeHolder= new CubeHolder();
+			var roundedCube:RoundedCube=cubeHolder.getRoundedCube();
+			var mood:String = cubeHolder.getMood();
+			trace(mood);
+					
 		}
+
 		
 		public function initEngine():void
 		{
@@ -116,7 +118,15 @@
 					scene.removeChild(cubesArray[i]);
 					cubesArray[i]=null;
 					cubesArray.splice(i,1);
-				trace("hit!" + cubesArray[i]);
+					trace("hit!" + cubesArray[i]);
+					/*
+					if(cubesArray[i].getMood()==yourMood){
+						scores+=10;
+						trace("SCORE" + this.scores);
+					}else{
+						scores+=1;
+						trace("Lost" + this.scores);
+					}*/
 				}
 			}
 		}
@@ -138,7 +148,7 @@
 			return true;
 		}
 		
-		function intervalAction():void {
+		protected function intervalAction():void {
 			
 			var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
 				cubesArray.push(roundedCube);
@@ -149,13 +159,11 @@
 			if(cubesArray.length>0){
 				for(var i:int = 0; i<cubesArray.length; i++){
 					if(cubesArray[i].z > myHero.z){
-									trace("zdobyles punkt!!");
-
+					trace("Kostki sie ruszaja!");
 					cubesArray[i].z =  cubesArray[i].z - 200;
 					}else{
-						// kasacja obiektu
-						trace("TODO: kasacja");
-						cubesArray[i].z=1000;
+					trace("TODO: kasacja");
+					cubesArray[i].z=1000;
 					}
 				}
 			}
@@ -200,7 +208,10 @@
 			trace(camera.fov);
 		}
 			
-		
+		protected function restartGame():void {
+					
+		}
+
 		
 		
 
