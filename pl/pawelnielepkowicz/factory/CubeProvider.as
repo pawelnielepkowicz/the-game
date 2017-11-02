@@ -25,6 +25,10 @@
 			
 		}
 		
+		public function getMood():String{
+			return this.mood;
+		}
+		
 			
 		public function provide():RoundedCube {
 			var bitmapFile;
