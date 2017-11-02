@@ -10,8 +10,7 @@
 	import flash.utils.*;
 	import flash.events.KeyboardEvent;
     import flash.ui.Keyboard;
-	import away3d.primitives.Cube;
-	import away3d.primitives.RoundedCube;
+	import away3d.primitives.*;
 	import away3d.primitives.data.CubeMaterialsData;
 	import away3d.materials.BitmapFileMaterial;
 	import pl.pawelnielepkowicz.*
@@ -54,19 +53,8 @@
 			initMesh();
 			initCamera();
 			initHero();
-			
-			testHolder();
+			initSkyBox()
 		}
-		
-		public function testHolder():void{
-			
-			var cubeHolder:CubeHolder= new CubeHolder();
-			var roundedCube:RoundedCube=cubeHolder.getRoundedCube();
-			var mood:String = cubeHolder.getMood();
-			trace(mood);
-					
-		}
-
 		
 		public function initEngine():void
 		{
@@ -182,6 +170,33 @@
 			myHero.z =  -1300;
 			scene.addChild(myHero);
 		}
+		
+		/**
+		 * Creates a new <code>Skybox</code> object.
+		 *
+		 * @param	front		The material to use for the skybox front.
+		 * @param	left		The material to use for the skybox left.
+		 * @param	back		The material to use for the skybox back.
+		 * @param	right		The material to use for the skybox right.
+		 * @param	up			The material to use for the skybox up.
+		 * @param	down		The material to use for the skybox down.
+		 * 
+		 */
+		
+		protected function initSkyBox():void {
+			var skyBox:Skybox = new Skybox(
+										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayFront2048.png"),
+										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayLeft2048.png"),
+										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayBack2048.png"),
+										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayRight2048.png"),
+										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayUb2048.png"),
+										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayDown2048.png")  
+										   );
+			scene.addChild(skyBox);
+			
+			
+		}
+		
 		
 		protected function initMesh():void {
 			var gridPlane:GridPlane = new GridPlane({
