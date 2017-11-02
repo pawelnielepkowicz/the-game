@@ -17,7 +17,7 @@
 		var mood:String = new String;
 		
 		
-		var texturesArray:Array = new Array("one.jpg", "one.jpg", "one.jpg", "one.jpg", "one.jpg", "six.jpg", "six.jpg", "six.jpg", "six.jpg", "six.jpg");
+		var texturesArray:Array = new Array("zero.jpg", "one.jpg", "two.jpg", "three.jpg", "four.jpg", "five.jpg", "six.jpg", "seven.jpg", "eight.jpg", "nine.jpg");
 
 		
 		public function CubeProvider():void
@@ -36,10 +36,10 @@
 			var randomNumber:Number = Math.floor(Math.random()*10);
 			
 			if(randomNumber>5){
-				bitmapFile = "one.jpg";
+				bitmapFile = texturesArray[randomNumber];
 				this.mood="happy";
 			}else{
-				bitmapFile = "two.jpg";
+				bitmapFile = texturesArray[randomNumber];
 				this.mood="sad";
 			}
 
@@ -64,7 +64,7 @@
 			 bfm_right.smooth=true;
  			 cubeMaterialsData.right = bfm_right;
 			 
-			 var bfm_top:BitmapFileMaterial = new BitmapFileMaterial("textures/" + bitmapFile);
+			 var bfm_top:BitmapFileMaterial = new BitmapFileMaterial("top.jpg");
 			 bfm_top.smooth=true;
  			 cubeMaterialsData.top = bfm_top;
 
