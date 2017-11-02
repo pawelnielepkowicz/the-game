@@ -21,14 +21,10 @@
 			if(negativeIndicator>5){
 				_negative=false
 				rangeResult = rangeIndicator;
-				trace("positive" + _negative);
-				trace("rangeResult" + rangeResult);
 				return rangeResult
 			}else{
 				_negative=true
 				rangeResult = rangeIndicator *(-1);
-				trace("negative" + _negative);
-				trace("rangeResult" + rangeResult);
 				return rangeResult
 			}
 			return -1;

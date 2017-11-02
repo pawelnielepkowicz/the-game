@@ -45,6 +45,7 @@
 		var scores:int = 0;
 		var lifeBarWidth:int = 300;
 		var yourMood:String = "sad"
+		var gamePaused:Boolean = false;
 ;
 		public function Main():void
 		{
@@ -90,7 +91,11 @@
 			
             if (key == 37 || key == 65) {moveLeft = true;}
             if (key == 39 || key == 68) {moveRight = true;}
-       
+			
+			if (key == 35) {restartGame();} //End
+       		if (key == 19) {pauseGame();} // Pause
+			if (key == 36) {resumeGame();} // Home
+
         }
 		
 		 private function keyRelease(e:KeyboardEvent):void {
@@ -99,10 +104,7 @@
             if (key == 39 || key == 68) {moveRight = false;}
         }
 
-   		private function keyReleased(e:KeyboardEvent):void 
- 	    {
-   		    trace("keyReleased");
- 	    }
+   		
 		
 		protected function onEnterFrame(event:Event):void
 		{
@@ -114,19 +116,23 @@
             if (moveRight && myHero.x < limitRight ) {myHero.x += step;}
 			
 			for(var i:int = 0; i<cubesArray.length; i++){
-				if(AABBTest(cubesArray[i])){
-					scene.removeChild(cubesArray[i]);
-					cubesArray[i]=null;
-					cubesArray.splice(i,1);
-					trace("hit!" + cubesArray[i]);
-					/*
+				if(AABBTest(cubesArray[i].getRoundedCube())){
+					trace("hit! " + scores);
 					if(cubesArray[i].getMood()==yourMood){
 						scores+=10;
-						trace("SCORE" + this.scores);
-					}else{
+						lifeBarWidth+=5;
+						trace("Score scores: " + this.scores);
+						trace("Score lifeBarWidth: " + this.lifeBarWidth);	
+						}else{
 						scores+=1;
-						trace("Lost" + this.scores);
-					}*/
+						lifeBarWidth-=5;
+						trace("Lost scores: " + this.scores);
+						trace("Lost lifeBarWidth: " + this.lifeBarWidth);
+
+					}
+					scene.removeChild(cubesArray[i].getRoundedCube());
+					cubesArray[i]=null;
+					cubesArray.splice(i,1);
 				}
 			}
 		}
@@ -149,24 +155,25 @@
 		}
 		
 		protected function intervalAction():void {
+			if(!gamePaused){
+				var cubeHolder:CubeHolder= new CubeHolder();
 			
-			var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
-				cubesArray.push(roundedCube);
-				roundedCube.x = gameUtils.getRandomPosition(this.limitRight, true);
-				roundedCube.z =  1000;
-				scene.addChild(roundedCube);
+				cubesArray.push(cubeHolder);
+				cubeHolder.getRoundedCube().x = gameUtils.getRandomPosition(this.limitRight, true);
+				cubeHolder.getRoundedCube().z =  1000;
+				scene.addChild(cubeHolder.getRoundedCube());
 			
-			if(cubesArray.length>0){
-				for(var i:int = 0; i<cubesArray.length; i++){
-					if(cubesArray[i].z > myHero.z){
-					trace("Kostki sie ruszaja!");
-					cubesArray[i].z =  cubesArray[i].z - 200;
-					}else{
-					trace("TODO: kasacja");
-					cubesArray[i].z=1000;
+				if(cubesArray.length>0){
+					for(var i:int = 0; i<cubesArray.length; i++){
+						if(cubesArray[i].getRoundedCube().z > myHero.z){
+						cubesArray[i].getRoundedCube().z =  cubesArray[i].getRoundedCube().z - 200;
+						}else{
+						cubesArray[i].getRoundedCube().z=1000;
+						}
 					}
 				}
 			}
+			
 		}
 		
 		protected function initHero():void {
@@ -174,18 +181,6 @@
 			myHero.x = -350;
 			myHero.z =  -1300;
 			scene.addChild(myHero);
-		}
-		
-
-
-		protected function initCustomCubes():void {
-			for(var i:int = 0; i<10; i++){
-				var roundedCube:RoundedCube = object3DFactory.get3DObjectType("Cube").provide();
-				cubesArray.push(roundedCube);
-				roundedCube.x = 100* i - 500;
-				roundedCube.z =  1000;
-				scene.addChild(cubesArray[i]);
-			}
 		}
 		
 		protected function initMesh():void {
@@ -208,7 +203,29 @@
 			trace(camera.fov);
 		}
 			
+		protected function pauseGame():void {
+			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
+			gamePaused=true;
+			trace("pauseGame!!!!!!!!!!!!!!!!!!");
+		}
+		
+		protected function resumeGame():void {
+			gamePaused=false
+			addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			trace("resumeGame!!!!!!!!!!!!!!!!!!");
+		}
+
+
+
 		protected function restartGame():void {
+			trace("RestartGame!!!!!!!!!!!!!!!!!!");
+			
+			for(var i:int = 0; i<cubesArray.length; i++){
+				scene.removeChild(cubesArray[i].getRoundedCube());
+			}
+			cubesArray.splice(0);
+			scores = 0;
+			lifeBarWidth=300;
 					
 		}
 
