@@ -48,6 +48,8 @@
 		var gamePaused:Boolean = false;
 		var lifebar_mc:LifeBar = new LifeBar();
 		var gameOver_mc:GameOver = new GameOver();
+		var startPanel_mc:StartPanel = new StartPanel();
+
 
 		
 		//camera ritation
@@ -55,17 +57,20 @@
 		public function Main():void
 		{
 			initEngine();
-			initListeners();
 			initMesh();
 			initCamera();
 			initHero();
-			initSkyBox()
-			initUi()
-
+			initListeners();
+			initSkyBox();
+			var intervalId:uint = setTimeout(
+    		 function(){ 
+			 pauseGame(); }
+			 , 2000);
 		}
 		
-		public function initEngine():void
-		{
+		
+		
+		public function initEngine():void{
 			view = new View3D();
 			scene = view.scene;
 			camera = view.camera;
@@ -73,16 +78,17 @@
 			view.x = stage.stageWidth / 2;
 			view.y = stage.stageHeight / 2;
 			var myInterval:uint = setInterval (generateCubes, 900);
-		}
-		
-		public function initUi():void{
+			
+			startPanel_mc.x = stage.stageWidth/2 - startPanel_mc.width/2;
+			startPanel_mc.y = stage.stageHeight/2 - startPanel_mc.height/2;
+			stage.addChild(startPanel_mc);
+			
 			stage.addChild(lifebar_mc);
 			lifebar_mc.testText.text=String(scores);
 			lifebar_mc.x=0;
-
-
+			lifebar_mc.y=0;
 		}
-		
+
 		public function updateUi():void{
 			
 			if(this.lifeBarWidth<=300){
@@ -91,7 +97,6 @@
 				lifebar_mc.pparent_mc.width=lifeBarWidth=300;
 			}
 			lifebar_mc.testText.text=String(scores);
-
 
 			if(lifeBarWidth<=0 || scores<=0){
 				gameOver();
@@ -104,14 +109,38 @@
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyPress);
             stage.addEventListener(KeyboardEvent.KEY_UP, keyRelease);
 			gameOver_mc.restart_mc.addEventListener(MouseEvent.CLICK, restartBtnClicked);
+			
+			startPanel_mc.dobry_mc.addEventListener(MouseEvent.CLICK, dobryClicked);
+			startPanel_mc.zly_mc.addEventListener(MouseEvent.CLICK, zlyClicked);
+
+			startPanel_mc.start_mc.addEventListener(MouseEvent.CLICK, startClicked);
+
 		}
+		
+		private function dobryClicked(e:MouseEvent):void {
+			yourMood="happy";
+			startPanel_mc.dobry_mc.alpha=1;
+			startPanel_mc.zly_mc.alpha=0.7;
+            trace("happy: " + yourMood);
+        }
+		
+		private function zlyClicked(e:MouseEvent):void {
+			yourMood="sad";
+			startPanel_mc.dobry_mc.alpha=0.7;
+			startPanel_mc.zly_mc.alpha=1;
+            trace("sad: " + yourMood);
+        }
+		
+		private function startClicked(e:MouseEvent):void {
+			stage.removeChild(startPanel_mc);
+            resumeGame()
+			trace("yourMood: " + yourMood);
+        }
 		
 		 private function keyPress(e:KeyboardEvent):void {
             var key:uint = e.keyCode;
 			
-            if (key == 37 || key == 65) {moveLeft = true;
-						trace("moveLeft!!!!!!!!!!!!!!!!!!");
-						}
+            if (key == 37 || key == 65) {moveLeft = true;}
             if (key == 39 || key == 68) {moveRight = true;}
 			
 			if (key == 35) {restartGame();} //End
@@ -125,15 +154,7 @@
             if (key == 37 || key == 65) {moveLeft = false;}
             if (key == 39 || key == 68) {moveRight = false;}
         }
-		
-		private function restartBtnClicked(e:MouseEvent):void {
-			restartGame();
-          trace("restartBtnClicked");
-        }
-		
 
-   		
-		
 		protected function onEnterFrameS(event:Event):void
 		{
 			if(!gamePaused){
@@ -148,7 +169,7 @@
 				for(var j:int = 0; j<cubesArray.length; j++){
 					if(AABBTest(cubesArray[j].getRoundedCube())){
 						trace("hit! " + scores);
-						if(cubesArray[j].getMood()==yourMood){
+						if(cubesArray[j].getMood()!=yourMood){
 							scores+=10;
 							lifeBarWidth+=10;
 							updateUi();
@@ -172,7 +193,6 @@
 					}
 				}
 			
-			
 			if(cubesArray.length>0){
 					for(var i:int = 0; i<cubesArray.length; i++){
 						if(cubesArray[i].getRoundedCube().z > myHero.z){
@@ -185,7 +205,6 @@
 					}
 				}
 			}
-			
 		}
 		
 		private function AABBTest(testObject: RoundedCube):Boolean{
@@ -234,10 +253,7 @@
 										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayDown2048.png")  
 										   );
 			scene.addChild(skyBox);
-			
-			
 		}
-		
 		
 		protected function initMesh():void {
 			var gridPlane:GridPlane = new GridPlane({
@@ -273,7 +289,6 @@
 			stage.removeChild(gameOver_mc)
 
 			resumeGame()
-					
 		}
 			
 		protected function pauseGame():void {
@@ -288,10 +303,7 @@
 		
 		protected function gameOver():void {
 			pauseGame();
-				
-			/*stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyPress);
-            stage.removeEventListener(KeyboardEvent.KEY_UP, keyRelease);*/
-			
+
 			gameOver_mc.x = stage.stageWidth/2 - gameOver_mc.width/2;
 			gameOver_mc.y = stage.stageHeight/2 - gameOver_mc.height/2;
 			stage.addChild(gameOver_mc);
@@ -300,12 +312,9 @@
 			trace("gameOver!!!!!!!!!!!!!!!!!!");
 		}
 
-
-
-		
-
-		
-		
-
+		private function restartBtnClicked(e:MouseEvent):void {
+			restartGame();
+            trace("restartBtnClicked");
+        }
 	}
 }
