@@ -51,9 +51,9 @@
 			roundedCube = new RoundedCube;
 
 			roundedCube = new RoundedCube({
-														  width:128,
-														  height:128,
-														  depth: 128,
+														  width:64,
+														  height:64,
+														  depth: 64,
 														  radius:13,
 														  subdivision:2,
 														  cubicmapping:true,

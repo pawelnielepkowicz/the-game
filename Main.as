@@ -4,11 +4,12 @@
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
 	
+	
 	import flash.display.Sprite;
 	import flash.display.*;
 	import flash.events.Event;
 	import flash.utils.*;
-	import flash.events.KeyboardEvent;
+	import flash.events.*;
     import flash.ui.Keyboard;
 	import away3d.primitives.*;
 	import away3d.primitives.data.CubeMaterialsData;
@@ -45,7 +46,12 @@
 		var lifeBarWidth:int = 300;
 		var yourMood:String = "sad"
 		var gamePaused:Boolean = false;
-;
+		var lifebar_mc:LifeBar = new LifeBar();
+		var gameOver_mc:GameOver = new GameOver();
+
+		
+		//camera ritation
+
 		public function Main():void
 		{
 			initEngine();
@@ -54,6 +60,8 @@
 			initCamera();
 			initHero();
 			initSkyBox()
+			initUi()
+
 		}
 		
 		public function initEngine():void
@@ -64,20 +72,46 @@
 			addChild(view);
 			view.x = stage.stageWidth / 2;
 			view.y = stage.stageHeight / 2;
-			var myInterval:uint = setInterval (intervalAction, 500);
+			var myInterval:uint = setInterval (generateCubes, 900);
 		}
 		
-		public function initListeners():void
-		{
-			addEventListener(Event.ENTER_FRAME, onEnterFrame);
+		public function initUi():void{
+			stage.addChild(lifebar_mc);
+			lifebar_mc.testText.text=String(scores);
+			lifebar_mc.x=0;
+
+
+		}
+		
+		public function updateUi():void{
+			
+			if(this.lifeBarWidth<=300){
+			lifebar_mc.pparent_mc.width=lifeBarWidth;
+			}else{
+				lifebar_mc.pparent_mc.width=lifeBarWidth=300;
+			}
+			lifebar_mc.testText.text=String(scores);
+
+
+			if(lifeBarWidth<=0 || scores<=0){
+				gameOver();
+			}
+			trace("updateUi");
+		}
+		
+		public function initListeners():void{
+			stage.addEventListener(Event.ENTER_FRAME, onEnterFrameS);
 			stage.addEventListener(KeyboardEvent.KEY_DOWN, keyPress);
             stage.addEventListener(KeyboardEvent.KEY_UP, keyRelease);
+			gameOver_mc.restart_mc.addEventListener(MouseEvent.CLICK, restartBtnClicked);
 		}
 		
 		 private function keyPress(e:KeyboardEvent):void {
             var key:uint = e.keyCode;
 			
-            if (key == 37 || key == 65) {moveLeft = true;}
+            if (key == 37 || key == 65) {moveLeft = true;
+						trace("moveLeft!!!!!!!!!!!!!!!!!!");
+						}
             if (key == 39 || key == 68) {moveRight = true;}
 			
 			if (key == 35) {restartGame();} //End
@@ -91,38 +125,67 @@
             if (key == 37 || key == 65) {moveLeft = false;}
             if (key == 39 || key == 68) {moveRight = false;}
         }
+		
+		private function restartBtnClicked(e:MouseEvent):void {
+			restartGame();
+          trace("restartBtnClicked");
+        }
+		
 
    		
 		
-		protected function onEnterFrame(event:Event):void
+		protected function onEnterFrameS(event:Event):void
 		{
-			view.render();
-			myHero.yaw(1.5);
+			if(!gamePaused){
 			
-			if (moveLeft && myHero.x > limitLeft )  {myHero.x -= step;} 
-		
-            if (moveRight && myHero.x < limitRight ) {myHero.x += step;}
+				view.render();
+				myHero.yaw(1.5);
+				
+				if (moveLeft && myHero.x > limitLeft )  {myHero.x -= step;} 
 			
-			for(var i:int = 0; i<cubesArray.length; i++){
-				if(AABBTest(cubesArray[i].getRoundedCube())){
-					trace("hit! " + scores);
-					if(cubesArray[i].getMood()==yourMood){
-						scores+=10;
-						lifeBarWidth+=5;
-						trace("Score scores: " + this.scores);
-						trace("Score lifeBarWidth: " + this.lifeBarWidth);	
-						}else{
-						scores+=1;
-						lifeBarWidth-=5;
-						trace("Lost scores: " + this.scores);
-						trace("Lost lifeBarWidth: " + this.lifeBarWidth);
-
+				if (moveRight && myHero.x < limitRight ) {myHero.x += step;}
+				
+				for(var j:int = 0; j<cubesArray.length; j++){
+					if(AABBTest(cubesArray[j].getRoundedCube())){
+						trace("hit! " + scores);
+						if(cubesArray[j].getMood()==yourMood){
+							scores+=10;
+							lifeBarWidth+=10;
+							updateUi();
+							trace("Score scores: " + this.scores);
+							trace("Score lifeBarWidth: " + this.lifeBarWidth);	
+							scene.removeChild(cubesArray[j].getRoundedCube());
+							cubesArray[i]=null;
+							cubesArray.splice(i,1);
+						
+							}else{
+							scores-=100;
+							lifeBarWidth-=100;
+							updateUi();
+	
+							scene.removeChild(cubesArray[j].getRoundedCube());
+							cubesArray[j]=null;
+							cubesArray.splice(j,1);
+							trace("Lost scores: " + this.scores);
+							trace("Lost lifeBarWidth: " + this.lifeBarWidth);
+						}
 					}
-					scene.removeChild(cubesArray[i].getRoundedCube());
-					cubesArray[i]=null;
-					cubesArray.splice(i,1);
+				}
+			
+			
+			if(cubesArray.length>0){
+					for(var i:int = 0; i<cubesArray.length; i++){
+						if(cubesArray[i].getRoundedCube().z > myHero.z){
+						cubesArray[i].getRoundedCube().z =  cubesArray[i].getRoundedCube().z - 10;
+						}else{
+						scene.removeChild(cubesArray[i].getRoundedCube());
+						cubesArray[i]=null;
+						cubesArray.splice(i,1)
+						}
+					}
 				}
 			}
+			
 		}
 		
 		private function AABBTest(testObject: RoundedCube):Boolean{
@@ -142,7 +205,7 @@
 			return true;
 		}
 		
-		protected function intervalAction():void {
+		protected function generateCubes():void {
 			if(!gamePaused){
 				var cubeHolder:CubeHolder= new CubeHolder();
 			
@@ -150,16 +213,6 @@
 				cubeHolder.getRoundedCube().x = gameUtils.getRandomPosition(this.limitRight, true);
 				cubeHolder.getRoundedCube().z =  1000;
 				scene.addChild(cubeHolder.getRoundedCube());
-			
-				if(cubesArray.length>0){
-					for(var i:int = 0; i<cubesArray.length; i++){
-						if(cubesArray[i].getRoundedCube().z > myHero.z){
-						cubesArray[i].getRoundedCube().z =  cubesArray[i].getRoundedCube().z - 200;
-						}else{
-						cubesArray[i].getRoundedCube().z=1000;
-						}
-					}
-				}
 			}
 			
 		}
@@ -170,19 +223,7 @@
 			myHero.z =  -1300;
 			scene.addChild(myHero);
 		}
-		
-		/**
-		 * Creates a new <code>Skybox</code> object.
-		 *
-		 * @param	front		The material to use for the skybox front.
-		 * @param	left		The material to use for the skybox left.
-		 * @param	back		The material to use for the skybox back.
-		 * @param	right		The material to use for the skybox right.
-		 * @param	up			The material to use for the skybox up.
-		 * @param	down		The material to use for the skybox down.
-		 * 
-		 */
-		
+
 		protected function initSkyBox():void {
 			var skyBox:Skybox = new Skybox(
 										   new BitmapFileMaterial("textures/skyBox/TropicalSunnyDayFront2048.png"),
@@ -217,32 +258,51 @@
 			camera.rotationX= -20;
 			trace(camera.fov);
 		}
+		
+		protected function restartGame():void {
+			trace("RestartGame!!!!!!!!!!!!!!!!!!");
+			scores = 0;
+			lifeBarWidth = 300;
+		
+			for(var i:int = 0; i<cubesArray.length; i++){
+				scene.removeChild(cubesArray[i].getRoundedCube());
+				cubesArray.splice(i,1);
+			}
+			lifebar_mc.testText.text=String(0);
+			lifebar_mc.pparent_mc.width=300;
+			stage.removeChild(gameOver_mc)
+
+			resumeGame()
+					
+		}
 			
 		protected function pauseGame():void {
-			removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 			gamePaused=true;
 			trace("pauseGame!!!!!!!!!!!!!!!!!!");
 		}
 		
 		protected function resumeGame():void {
 			gamePaused=false
-			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			trace("resumeGame!!!!!!!!!!!!!!!!!!");
 		}
-
-
-
-		protected function restartGame():void {
-			trace("RestartGame!!!!!!!!!!!!!!!!!!");
+		
+		protected function gameOver():void {
+			pauseGame();
+				
+			/*stage.removeEventListener(KeyboardEvent.KEY_DOWN, keyPress);
+            stage.removeEventListener(KeyboardEvent.KEY_UP, keyRelease);*/
 			
-			for(var i:int = 0; i<cubesArray.length; i++){
-				scene.removeChild(cubesArray[i].getRoundedCube());
-			}
-			cubesArray.splice(0);
-			scores = 0;
-			lifeBarWidth=300;
-					
+			gameOver_mc.x = stage.stageWidth/2 - gameOver_mc.width/2;
+			gameOver_mc.y = stage.stageHeight/2 - gameOver_mc.height/2;
+			stage.addChild(gameOver_mc);
+			gameOver_mc.punktyTotal_mc.text=String(scores);
+			
+			trace("gameOver!!!!!!!!!!!!!!!!!!");
 		}
+
+
+
+		
 
 		
 		
