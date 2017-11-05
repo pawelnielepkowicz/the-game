@@ -49,6 +49,8 @@
 		var lifebar_mc:LifeBar = new LifeBar();
 		var gameOver_mc:GameOver = new GameOver();
 		var startPanel_mc:StartPanel = new StartPanel();
+		var lifes:int = 3;
+		var gameSpeed:int = 1;
 
 
 		
@@ -62,10 +64,7 @@
 			initHero();
 			initListeners();
 			initSkyBox();
-			var intervalId:uint = setTimeout(
-    		 function(){ 
-			 pauseGame(); }
-			 , 2000);
+			
 		}
 		
 		
@@ -87,6 +86,8 @@
 			lifebar_mc.testText.text=String(scores);
 			lifebar_mc.x=0;
 			lifebar_mc.y=0;
+			lifebar_mc.lifes_mc.gotoAndStop(3);
+
 		}
 
 		public function updateUi():void{
@@ -98,10 +99,24 @@
 			}
 			lifebar_mc.testText.text=String(scores);
 
-			if(lifeBarWidth<=0 || scores<=0){
-				gameOver();
+			if(lifeBarWidth<=0){
+				manageLifes();
+				
+				
 			}
-			trace("updateUi");
+		}
+		
+		public function manageLifes():void{
+			lifes-=1;
+			trace("lifes: " + lifes);
+			if(lifes<=0){
+				gameOver();
+			}else{
+				lifebar_mc.lifes_mc.gotoAndStop(lifes);
+				restartGame();
+			}
+			
+			
 		}
 		
 		public function initListeners():void{
@@ -114,19 +129,29 @@
 			startPanel_mc.zly_mc.addEventListener(MouseEvent.CLICK, zlyClicked);
 
 			startPanel_mc.start_mc.addEventListener(MouseEvent.CLICK, startClicked);
+			
+			var intervalId:uint = setTimeout(
+    			function(){pauseGame();},2000);
 
+			var updateGameSpeed:uint = setInterval(
+    			function(){
+					if(!gamePaused){
+						gameSpeed++;
+						trace("gameSpeed: " + gameSpeed);
+						}
+					},5000);
 		}
 		
 		private function dobryClicked(e:MouseEvent):void {
 			yourMood="happy";
 			startPanel_mc.dobry_mc.alpha=1;
-			startPanel_mc.zly_mc.alpha=0.7;
+			startPanel_mc.zly_mc.alpha=0.6;
             trace("happy: " + yourMood);
         }
 		
 		private function zlyClicked(e:MouseEvent):void {
 			yourMood="sad";
-			startPanel_mc.dobry_mc.alpha=0.7;
+			startPanel_mc.dobry_mc.alpha=0.6;
 			startPanel_mc.zly_mc.alpha=1;
             trace("sad: " + yourMood);
         }
@@ -180,7 +205,6 @@
 							cubesArray.splice(i,1);
 						
 							}else{
-							scores-=100;
 							lifeBarWidth-=100;
 							updateUi();
 	
@@ -195,8 +219,8 @@
 			
 			if(cubesArray.length>0){
 					for(var i:int = 0; i<cubesArray.length; i++){
-						if(cubesArray[i].getRoundedCube().z > myHero.z){
-						cubesArray[i].getRoundedCube().z =  cubesArray[i].getRoundedCube().z - 10;
+						if(cubesArray[i].getRoundedCube().z > myHero.z+20){
+						cubesArray[i].getRoundedCube().z =  cubesArray[i].getRoundedCube().z - 10 - gameSpeed;
 						}else{
 						scene.removeChild(cubesArray[i].getRoundedCube());
 						cubesArray[i]=null;
@@ -277,16 +301,16 @@
 		
 		protected function restartGame():void {
 			trace("RestartGame!!!!!!!!!!!!!!!!!!");
-			scores = 0;
 			lifeBarWidth = 300;
-		
+			gameSpeed = 1;
+
 			for(var i:int = 0; i<cubesArray.length; i++){
 				scene.removeChild(cubesArray[i].getRoundedCube());
-				cubesArray.splice(i,1);
+							cubesArray[i]=null;
+							cubesArray.splice(i,1);
 			}
 			lifebar_mc.testText.text=String(0);
 			lifebar_mc.pparent_mc.width=300;
-			stage.removeChild(gameOver_mc)
 
 			resumeGame()
 		}
@@ -303,6 +327,7 @@
 		
 		protected function gameOver():void {
 			pauseGame();
+			lifebar_mc.lifes_mc.gotoAndStop(4);
 
 			gameOver_mc.x = stage.stageWidth/2 - gameOver_mc.width/2;
 			gameOver_mc.y = stage.stageHeight/2 - gameOver_mc.height/2;
@@ -313,7 +338,11 @@
 		}
 
 		private function restartBtnClicked(e:MouseEvent):void {
+			lifebar_mc.lifes_mc.gotoAndStop(3);
+			lifes=3;
+			gameSpeed = 1;
 			restartGame();
+			stage.removeChild(gameOver_mc);
             trace("restartBtnClicked");
         }
 	}
